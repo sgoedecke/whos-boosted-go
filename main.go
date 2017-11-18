@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
+	"sort"
 )
 
 func main() {
@@ -20,9 +21,14 @@ func main() {
 	router.Use(gin.Logger())
 	log.Print("Server listening on port " + port)
 
-	router.GET("/scan/:id", scanAccount)
-	router.GET("/scan_friends/:id", scanFriends)
+	router.GET("/", renderRoot)
+	router.GET("/scan_friends", scanFriends)
+	router.GET("/api/scan/:id", scanAccount)
 	router.Run(":" + port)
+}
+
+func renderRoot(c *gin.Context) {
+	c.HTML(200, "index.tmpl", nil)
 }
 
 type ScanResult struct {
@@ -33,7 +39,7 @@ type ScanResult struct {
 }
 
 func scanFriends(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Query("id")
 	friend_ids := getFriendIds(id)
 	friend_hash := getNamesFromIds(friend_ids)
 
@@ -47,6 +53,10 @@ func scanFriends(c *gin.Context) {
 	for i := 0; i < len(friend_hash); i++ {
 		results = append(results, <-resultsChan)
 	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Chance > results[j].Chance
+	})
 
 	c.HTML(200, "results.tmpl", gin.H{
 		"results": results,

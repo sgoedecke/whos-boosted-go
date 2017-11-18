@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"math/big"
 	"net/http"
 )
@@ -62,9 +61,6 @@ func convert64To32SteamId(id string) string {
 // hits openDota API and returns a map of winrates by region
 func openDotaLookup(id64 string) (*BoostCheckData, error) {
 	id := convert64To32SteamId(id64)
-	log.Print(id64)
-	log.Print("Converted to")
-	log.Print(id)
 
 	resp, err := http.Get("https://api.opendota.com/api/players/" + id + "/counts")
 	defer resp.Body.Close()

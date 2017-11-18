@@ -15,6 +15,8 @@ func main() {
 	}
 
 	router := gin.New()
+	router.LoadHTMLGlob("templates/*")
+
 	router.Use(gin.Logger())
 	log.Print("Server listening on port " + port)
 
@@ -46,8 +48,8 @@ func scanFriends(c *gin.Context) {
 		results = append(results, <-resultsChan)
 	}
 
-	c.JSON(200, gin.H{
-		"scan_results": results,
+	c.HTML(200, "results.tmpl", gin.H{
+		"results": results,
 	})
 }
 

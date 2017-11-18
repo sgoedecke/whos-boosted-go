@@ -1,0 +1,15 @@
+<html>
+  <head></head>
+  <body>
+    <h1>Scan Results</h1>
+    {{ range .results }}
+    <div>
+      <h2>{{.Name}} ({{ .Id }})</h2>
+      {{.Chance}}
+      {{ range .Reasons }}
+      {{ . }}
+      {{ end }}
+    </div>
+    {{ end }}
+  </body>
+</html>

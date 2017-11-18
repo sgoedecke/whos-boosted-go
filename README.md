@@ -4,4 +4,6 @@ This is a Go server to estimate which (if any) of your Steam friends are boosted
 
 ## Usage
 
-Run the binary, then hit `localhost:3000/scan/:steam_id` to get a percentage estimate of whether the account with that steam id is boosted.
+Go [here](https://dota-boost-detective.herokuapp.com/) to try it out in the wild.
+
+For a single account, hit `/api/scan/:steam_id` to get a percentage estimate of whether the account with that steam id is boosted.

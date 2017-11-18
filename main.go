@@ -19,8 +19,43 @@ func main() {
 	log.Print("Server listening on port " + port)
 
 	router.GET("/scan/:id", scanAccount)
-
+	router.GET("/scan_friends/:id", scanFriends)
 	router.Run(":" + port)
+}
+
+type ScanResult struct {
+	Id      string
+	Name    string
+	Chance  int
+	Reasons []string
+}
+
+func scanFriends(c *gin.Context) {
+	id := c.Param("id")
+	friend_ids := getFriendIds(id)
+	friend_hash := getNamesFromIds(friend_ids)
+
+	resultsChan := make(chan ScanResult)
+	var results []ScanResult
+
+	for id, name := range friend_hash {
+		go scanPlayer(id, name, resultsChan)
+	}
+
+	for i := 0; i < len(friend_hash); i++ {
+		results = append(results, <-resultsChan)
+	}
+
+	c.JSON(200, gin.H{
+		"scan_results": results,
+	})
+}
+
+func scanPlayer(id string, name string, results chan<- ScanResult) {
+	boostCheckData, _ := openDotaLookup(id)
+	chance, reasons := boostChance(boostCheckData)
+	sr := ScanResult{id, name, chance, reasons}
+	results <- sr
 }
 
 func scanAccount(c *gin.Context) {
@@ -31,7 +66,6 @@ func scanAccount(c *gin.Context) {
 			"error": "could not fetch winrates",
 		})
 	}
-
 	chance, reasons := boostChance(boostCheckData)
 
 	c.JSON(200, gin.H{

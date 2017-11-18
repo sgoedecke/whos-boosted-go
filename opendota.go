@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"log"
+	"math/big"
 	"net/http"
 )
 
@@ -45,8 +47,25 @@ type BoostCheckData struct {
 	MostPlayedServer string
 }
 
+// takes a id64 (steam profile) and converts it to an id32 (dotabuff profile)
+func convert64To32SteamId(id string) string {
+	id64 := new(big.Int)
+	id64.SetString(id, 10)
+
+	m := new(big.Int)
+	m.SetString("76561197960265728", 10) // magic constant
+
+	res := new(big.Int).Sub(id64, m)
+	return res.String()
+}
+
 // hits openDota API and returns a map of winrates by region
-func openDotaLookup(id string) (*BoostCheckData, error) {
+func openDotaLookup(id64 string) (*BoostCheckData, error) {
+	id := convert64To32SteamId(id64)
+	log.Print(id64)
+	log.Print("Converted to")
+	log.Print(id)
+
 	resp, err := http.Get("https://api.opendota.com/api/players/" + id + "/counts")
 	defer resp.Body.Close()
 	if err != nil {
